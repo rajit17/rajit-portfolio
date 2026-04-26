@@ -3,31 +3,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
-// Project Type Definition (FIX 2: Proper TypeScript)
-interface Project {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  longDescription: string;
-  techStack: string[];
-  repo: string | null;
-  demo?: string;
-  youtube?: string;
-  hideRepo?: boolean;
-  hideDemo?: boolean;
-  hideYoutube?: boolean;
-  demoButtonLabel?: string;
-  color: string;
-  hoverColor: string;
-  span: string;
-  mediaType: string;
-  mediaUrl: string;
-  demoUrl: string;
-}
-
 // Project Data with Media & Layout Configuration
-const projects: Project[] = [
+const projects = [
   {
     id: "brahma",
     title: "BRAHMa",
@@ -57,7 +34,6 @@ const projects: Project[] = [
     repo: null,
     demo: "https://arxiv.org/abs/2511.23383",
     hideRepo: true,
-    hideYoutube: true,
     demoButtonLabel: "arXiv",
     color: "from-violet-600/20 to-blue-500/20",
     hoverColor: "group-hover:from-violet-600/40 group-hover:to-blue-500/40",
@@ -76,7 +52,6 @@ const projects: Project[] = [
     repo: null,
     demo: "https://rajit-research-assistant.netlify.app/?source",
     hideRepo: true,
-    hideYoutube: true,
     color: "from-purple-600/20 to-pink-500/20",
     hoverColor: "group-hover:from-purple-600/40 group-hover:to-pink-500/40",
     span: "md:col-span-1 md:row-span-2",
@@ -114,7 +89,6 @@ const projects: Project[] = [
     demo: null,
     hideRepo: true,
     hideDemo: true,
-    hideYoutube: true,
     color: "from-pink-600/20 to-rose-500/20",
     hoverColor: "group-hover:from-pink-600/40 group-hover:to-rose-500/40",
     span: "md:col-span-1 md:row-span-1",
@@ -132,8 +106,8 @@ const projects: Project[] = [
     repo: null,
     youtube: "https://www.youtube.com/playlist?list=PLyd5XzIFkzUT0k2Ntoa2Sxd2Hzo4Y8rT5",
     hideRepo: true,
-    hideDemo: true,
     hideYoutube: false,
+    hideDemo: true,
     color: "from-orange-500/20 to-red-500/20",
     hoverColor: "group-hover:from-orange-500/40 group-hover:to-red-500/40",
     span: "md:col-span-1 md:row-span-1",
@@ -151,8 +125,8 @@ const projects: Project[] = [
     repo: null,
     youtube: "https://youtu.be/soxZkV6rrfI?si",
     hideRepo: true,
-    hideDemo: true,
     hideYoutube: false,
+    hideDemo: true,
     color: "from-indigo-600/20 to-purple-500/20",
     hoverColor: "group-hover:from-indigo-600/40 group-hover:to-purple-500/40",
     span: "md:col-span-1 md:row-span-1",

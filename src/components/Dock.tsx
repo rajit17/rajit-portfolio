@@ -7,7 +7,7 @@ import {
   useTransform,
   MotionValue,
 } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 
 // Icons (Using simple SVGs or lucid-react if available, but I'll use SVG here for zero-deps)
@@ -57,15 +57,33 @@ export default function Dock() {
   const mouseX = useMotionValue(Infinity);
 
   return (
-    <motion.div
-      onMouseMove={(e) => mouseX.set(e.pageX)}
-      onMouseLeave={() => mouseX.set(Infinity)}
-      className="fixed bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-50 flex h-12 md:h-16 items-end gap-2 md:gap-4 rounded-2xl border border-white/10 bg-white/5 px-2 md:px-4 pb-2 md:pb-3 backdrop-blur-md max-w-[calc(100vw-2rem)] overflow-x-auto scrollbar-hide"
-    >
-      {DOCK_ITEMS.map((item) => (
-        <DockIcon key={item.id} mouseX={mouseX} item={item} />
-      ))}
-    </motion.div>
+    <>
+      {/* Spacer to prevent clipping of tooltips - larger on mobile */}
+      <div className="h-28 md:h-0" />
+      
+      <motion.div
+        onMouseMove={(e) => mouseX.set(e.pageX)}
+        onMouseLeave={() => mouseX.set(Infinity)}
+        className="fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-50 flex h-12 md:h-16 items-center gap-2 md:gap-4 rounded-full border border-white/10 bg-white/5 px-2 md:px-5 backdrop-blur-md max-w-[calc(100vw-1.5rem)] overflow-x-auto overflow-y-hidden scrollbar-hide"
+        style={{
+          scrollBehavior: 'smooth',
+        }}
+      >
+        {DOCK_ITEMS.map((item) => (
+          <DockIcon key={item.id} mouseX={mouseX} item={item} />
+        ))}
+      </motion.div>
+
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+    </>
   );
 }
 
@@ -77,13 +95,14 @@ function DockIcon({
   item: (typeof DOCK_ITEMS)[0];
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [showLabel, setShowLabel] = useState(false);
 
   const distance = useTransform(mouseX, (val) => {
     const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
     return val - bounds.x - bounds.width / 2;
   });
 
-  const widthSync = useTransform(distance, [-150, 0, 150], [32, 64, 32]);
+  const widthSync = useTransform(distance, [-150, 0, 150], [36, 72, 36]);
   const width = useSpring(widthSync, { mass: 0.1, stiffness: 150, damping: 12 });
 
   return (
@@ -91,14 +110,31 @@ function DockIcon({
       <motion.div
         ref={ref}
         style={{ width }}
-        className="aspect-square w-8 md:w-10 rounded-full bg-gray-700/50 border border-white/10 flex items-center justify-center hover:bg-gray-600/80 transition-colors group relative flex-shrink-0"
+        onMouseEnter={() => setShowLabel(true)}
+        onMouseLeave={() => setShowLabel(false)}
+        className="aspect-square w-9 md:w-11 rounded-full bg-gray-700/50 hover:bg-gray-600/80 border border-white/10 hover:border-white/20 flex items-center justify-center transition-colors group relative flex-shrink-0 cursor-pointer"
       >
-         <item.icon className="w-1/2 h-1/2 text-gray-200 group-hover:text-white" />
-         
-         {/* Tooltip - hidden on mobile */}
-         <span className="hidden md:block absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-white/10">
-            {item.label}
-         </span>
+        <item.icon className="w-1/2 h-1/2 text-gray-200 group-hover:text-white transition-colors" />
+        
+        {/* Desktop Tooltip - Above */}
+        <motion.span 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: showLabel ? 1 : 0, y: showLabel ? -5 : 10 }}
+          transition={{ duration: 0.2 }}
+          className="hidden md:block absolute -top-14 left-1/2 -translate-x-1/2 bg-gray-900/95 text-white text-xs px-3 py-2 rounded-lg whitespace-nowrap border border-white/20 pointer-events-none font-medium shadow-lg z-50"
+        >
+          {item.label}
+        </motion.span>
+
+        {/* Mobile Label - Below with subtle background */}
+        <motion.span 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: showLabel ? 1 : 0 }}
+          transition={{ duration: 0.2 }}
+          className="md:hidden absolute top-full mt-3 left-1/2 -translate-x-1/2 bg-gray-900/95 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none font-medium border border-white/20 z-50"
+        >
+          {item.label}
+        </motion.span>
       </motion.div>
     </Link>
   );
