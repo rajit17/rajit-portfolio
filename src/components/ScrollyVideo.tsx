@@ -1,7 +1,7 @@
 "use client";
 
 import { useScroll, useSpring, useMotionValueEvent, motion, MotionValue } from "framer-motion";
-import { useEffect, useRef, ReactNode } from "react";
+import { useEffect, useRef, useState, ReactNode } from "react";
 
 interface ScrollyVideoProps {
   src: string;
@@ -13,13 +13,20 @@ export default function ScrollyVideo({ src, children }: ScrollyVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastTimeRef = useRef<number>(0);
   const animationFrameRef = useRef<number | null>(null);
-  const isMobileRef = useRef<boolean>(false);
+  const pendingUpdateRef = useRef<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Detect if mobile on mount
   useEffect(() => {
-    isMobileRef.current = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+    };
   }, []);
 
   // Scroll progress for the container
@@ -28,24 +35,20 @@ export default function ScrollyVideo({ src, children }: ScrollyVideoProps) {
     offset: ["start start", "end end"],
   });
 
-  // Adaptive spring based on device type
-  const springScroll = useSpring(scrollYProgress, isMobileRef.current ? {
-    damping: 80,
-    stiffness: 300,
-    mass: 0.8,
-    velocity: 0,
-  } : {
+  // Optimized spring for ultra-smooth video playback
+  const springScroll = useSpring(scrollYProgress, {
     damping: 100,
     stiffness: 500,
     mass: 0.5,
     velocity: 0,
   });
 
-  // Update video time based on scroll with device-optimized throttling
+  // Update video time based on scroll with optimized throttling
   useMotionValueEvent(springScroll, "change", (latest) => {
+    if (isMobile) return;
     if (!videoRef.current || !videoRef.current.duration) return;
 
-    // Cancel previous frame request to prevent queue buildup
+    // Use requestAnimationFrame for better sync with browser rendering
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
@@ -54,10 +57,9 @@ export default function ScrollyVideo({ src, children }: ScrollyVideoProps) {
       if (videoRef.current && videoRef.current.readyState >= 2) {
         const targetTime = latest * videoRef.current.duration;
         
-        // Adaptive throttling: mobile needs larger threshold to prevent frame skipping
-        const threshold = isMobileRef.current ? 0.15 : 0.05;
-        
-        if (Math.abs(targetTime - lastTimeRef.current) > threshold) {
+        // Ultra-fine throttling: only update if difference > 0.05 seconds
+        // This allows smooth playback while preventing excessive seeking
+        if (Math.abs(targetTime - lastTimeRef.current) > 0.05) {
           videoRef.current.currentTime = targetTime;
           lastTimeRef.current = targetTime;
         }
@@ -94,12 +96,12 @@ export default function ScrollyVideo({ src, children }: ScrollyVideoProps) {
           playsInline
           preload="metadata"
           controls={false}
+          autoPlay={isMobile}
+          loop={isMobile}
           style={{ 
             willChange: "opacity",
             backfaceVisibility: "hidden",
             perspective: "1000px",
-            WebkitBackfaceVisibility: "hidden",
-            transform: "translate3d(0,0,0)",
           }}
         />
         {/* Render children (Overlay) passing the springScroll value */}
