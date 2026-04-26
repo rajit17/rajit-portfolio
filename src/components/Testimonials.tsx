@@ -35,6 +35,7 @@ export default function Testimonials() {
   const [formState, setFormState] = useState({ name: "", role: "", quote: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const [isMarqueePaused, setIsMarqueePaused] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,24 +95,23 @@ export default function Testimonials() {
             </motion.button>
        </div>
 
-      <div className="relative w-full overflow-hidden mask-linear-fade">
+      <div
+        className="relative w-full overflow-hidden mask-linear-fade"
+        onPointerDown={() => setIsMarqueePaused(true)}
+      >
          {/* Mask gradient for fade effect on edges */}
          <div className="absolute top-0 left-0 w-32 h-full z-20 bg-linear-to-r from-[#121212] to-transparent" />
          <div className="absolute top-0 right-0 w-32 h-full z-20 bg-linear-to-l from-[#121212] to-transparent" />
 
         <div className="flex w-max">
-          <motion.div
-            className="flex gap-8 px-4"
-            animate={{ x: "-50%" }}
-            transition={{
-              duration: 30,
-              ease: "linear",
-              repeat: Infinity,
-            }}
+          <div
+            className="testimonials-marquee flex gap-8 px-4"
+            style={{ animationPlayState: isMarqueePaused ? "paused" : undefined }}
           >
             {[...TESTIMONIALS, ...TESTIMONIALS, ...TESTIMONIALS].map((item, index) => (
               <div
                 key={index}
+                tabIndex={0}
                 className="w-[350px] md:w-[450px] p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm shrink-0"
               >
                  <div className="flex items-start gap-4 mb-6">
@@ -128,7 +128,7 @@ export default function Testimonials() {
                  </p>
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
 

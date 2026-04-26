@@ -22,3 +22,21 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+@keyframes testimonials-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.testimonials-marquee {
+  animation: testimonials-marquee 30s linear infinite;
+}
+
+.testimonials-marquee:hover,
+.testimonials-marquee:focus-within {
+  animation-play-state: paused;
+}
