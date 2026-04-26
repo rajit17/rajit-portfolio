@@ -3,8 +3,31 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
+// Project Type Definition (FIX 2: Proper TypeScript)
+interface Project {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  longDescription: string;
+  techStack: string[];
+  repo: string | null;
+  demo?: string;
+  youtube?: string;
+  hideRepo?: boolean;
+  hideDemo?: boolean;
+  hideYoutube?: boolean;
+  demoButtonLabel?: string;
+  color: string;
+  hoverColor: string;
+  span: string;
+  mediaType: string;
+  mediaUrl: string;
+  demoUrl: string;
+}
+
 // Project Data with Media & Layout Configuration
-const projects = [
+const projects: Project[] = [
   {
     id: "brahma",
     title: "BRAHMa",
@@ -16,6 +39,7 @@ const projects = [
     demo: "https://brahma-bar-detector.netlify.app/",
     youtube: "https://www.youtube.com/watch?v=PEQBmQQRjxQ",
     hideRepo: true,
+    hideYoutube: false,
     color: "from-blue-600/20 to-cyan-500/20",
     hoverColor: "group-hover:from-blue-600/40 group-hover:to-cyan-500/40",
     span: "md:col-span-2 md:row-span-2",
@@ -33,6 +57,7 @@ const projects = [
     repo: null,
     demo: "https://arxiv.org/abs/2511.23383",
     hideRepo: true,
+    hideYoutube: true,
     demoButtonLabel: "arXiv",
     color: "from-violet-600/20 to-blue-500/20",
     hoverColor: "group-hover:from-violet-600/40 group-hover:to-blue-500/40",
@@ -51,6 +76,7 @@ const projects = [
     repo: null,
     demo: "https://rajit-research-assistant.netlify.app/?source",
     hideRepo: true,
+    hideYoutube: true,
     color: "from-purple-600/20 to-pink-500/20",
     hoverColor: "group-hover:from-purple-600/40 group-hover:to-pink-500/40",
     span: "md:col-span-1 md:row-span-2",
@@ -69,6 +95,7 @@ const projects = [
     youtube: "https://youtu.be/HA-GR3qoySI",
     hideRepo: false,
     hideDemo: true,
+    hideYoutube: false,
     color: "from-green-600/20 to-teal-500/20",
     hoverColor: "group-hover:from-green-600/40 group-hover:to-teal-500/40",
     span: "md:col-span-1 md:row-span-1",
@@ -87,6 +114,7 @@ const projects = [
     demo: null,
     hideRepo: true,
     hideDemo: true,
+    hideYoutube: true,
     color: "from-pink-600/20 to-rose-500/20",
     hoverColor: "group-hover:from-pink-600/40 group-hover:to-rose-500/40",
     span: "md:col-span-1 md:row-span-1",
@@ -105,6 +133,7 @@ const projects = [
     youtube: "https://www.youtube.com/playlist?list=PLyd5XzIFkzUT0k2Ntoa2Sxd2Hzo4Y8rT5",
     hideRepo: true,
     hideDemo: true,
+    hideYoutube: false,
     color: "from-orange-500/20 to-red-500/20",
     hoverColor: "group-hover:from-orange-500/40 group-hover:to-red-500/40",
     span: "md:col-span-1 md:row-span-1",
@@ -123,6 +152,7 @@ const projects = [
     youtube: "https://youtu.be/soxZkV6rrfI?si",
     hideRepo: true,
     hideDemo: true,
+    hideYoutube: false,
     color: "from-indigo-600/20 to-purple-500/20",
     hoverColor: "group-hover:from-indigo-600/40 group-hover:to-purple-500/40",
     span: "md:col-span-1 md:row-span-1",
@@ -378,7 +408,7 @@ export default function Projects() {
                                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                                                 </a>
                                             )}
-                                            {!selectedProject.hideYoutube && selectedProject.youtube && (
+                                            {!selectedProject?.hideYoutube && selectedProject?.youtube && (
                                                 <a 
                                                     href={selectedProject.youtube} 
                                                     target="_blank" 
