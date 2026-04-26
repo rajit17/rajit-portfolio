@@ -13,7 +13,14 @@ export default function ScrollyVideo({ src, children }: ScrollyVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastTimeRef = useRef<number>(0);
   const animationFrameRef = useRef<number | null>(null);
-  const pendingUpdateRef = useRef<number | null>(null);
+  const isMobileRef = useRef<boolean>(false);
+
+  // Detect if mobile on mount
+  useEffect(() => {
+    isMobileRef.current = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+  }, []);
 
   // Scroll progress for the container
   const { scrollYProgress } = useScroll({
@@ -21,19 +28,24 @@ export default function ScrollyVideo({ src, children }: ScrollyVideoProps) {
     offset: ["start start", "end end"],
   });
 
-  // Optimized spring for ultra-smooth video playback
-  const springScroll = useSpring(scrollYProgress, {
+  // Adaptive spring based on device type
+  const springScroll = useSpring(scrollYProgress, isMobileRef.current ? {
+    damping: 80,
+    stiffness: 300,
+    mass: 0.8,
+    velocity: 0,
+  } : {
     damping: 100,
     stiffness: 500,
     mass: 0.5,
     velocity: 0,
   });
 
-  // Update video time based on scroll with optimized throttling
+  // Update video time based on scroll with device-optimized throttling
   useMotionValueEvent(springScroll, "change", (latest) => {
     if (!videoRef.current || !videoRef.current.duration) return;
 
-    // Use requestAnimationFrame for better sync with browser rendering
+    // Cancel previous frame request to prevent queue buildup
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
@@ -42,9 +54,10 @@ export default function ScrollyVideo({ src, children }: ScrollyVideoProps) {
       if (videoRef.current && videoRef.current.readyState >= 2) {
         const targetTime = latest * videoRef.current.duration;
         
-        // Ultra-fine throttling: only update if difference > 0.05 seconds
-        // This allows smooth playback while preventing excessive seeking
-        if (Math.abs(targetTime - lastTimeRef.current) > 0.05) {
+        // Adaptive throttling: mobile needs larger threshold to prevent frame skipping
+        const threshold = isMobileRef.current ? 0.15 : 0.05;
+        
+        if (Math.abs(targetTime - lastTimeRef.current) > threshold) {
           videoRef.current.currentTime = targetTime;
           lastTimeRef.current = targetTime;
         }
@@ -85,6 +98,8 @@ export default function ScrollyVideo({ src, children }: ScrollyVideoProps) {
             willChange: "opacity",
             backfaceVisibility: "hidden",
             perspective: "1000px",
+            WebkitBackfaceVisibility: "hidden",
+            transform: "translate3d(0,0,0)",
           }}
         />
         {/* Render children (Overlay) passing the springScroll value */}
