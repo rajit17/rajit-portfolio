@@ -5,19 +5,19 @@ import { useState } from "react";
 
 const TESTIMONIALS = [
   {
-    quote: "Rajit showed genuine interest in research and is consistently engaged in learning beyond the classroom. What stands out is his curiosity and drive—he explores literature, discusses ideas, and seeks guidance with initiative that's rare and a joy to work with.",
+    quote: "Rajit showed genuine interest in research and is consistently engaged in learning beyond the classroom. What stands out is his curiosity and drive. He explores literature, discusses ideas, and seeks guidance with initiative that's rare and a joy to work with.",
     name: "Dr. Santanu Pakhira",
     role: "M.Sc. Mentor & Supervisor, MANIT Bhopal",
     initials: "SP",
   },
   {
-    quote: "He fixed a decade-old MATLAB code and independently solved multiple technical challenges. What impressed me most was his innovative thinking and persistence—even after his internship ended, he continued improving the code. A true multidisciplinary thinker essential in modern science.",
+    quote: "He fixed a decade-old MATLAB code and independently solved multiple technical challenges. What impressed me most was his innovative thinking and persistence. Even after his internship ended, he continued improving the code. A true multidisciplinary thinker essential in modern science.",
     name: "Sai Karthik",
     role: "Scientist/Engineer, ISRO SDSC",
     initials: "SK",
   },
   {
-    quote: "Rajit achieved perfect 10 CGPA on his thesis but didn't stop—he asked to continue improving results. He built a GUI so others could use his research, showing commitment to making knowledge accessible. His dedication to research excellence is truly rare.",
+    quote: "Rajit achieved perfect 10 CGPA on his thesis but didn't stop. He asked to continue improving results. He built a GUI so others could use his research, showing commitment to making knowledge accessible. His dedication to research excellence is truly rare.",
     name: "Dr. Narendra Nath Patra",
     role: "Research Supervisor, IIT Indore",
     initials: "NNP",
@@ -36,6 +36,7 @@ export default function Testimonials() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
   const [isMarqueePaused, setIsMarqueePaused] = useState(false);
+  const [isHoverPaused, setIsHoverPaused] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +82,7 @@ export default function Testimonials() {
                 Kind <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-purple-400">Words</span>
             </motion.h2>
             <p className="text-gray-400 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
-                Feedback from scientists and physicists. I've had the pleasure of working with.
+                Feedback from scientists and physicists I&apos;ve had the pleasure of working with.
             </p>
             
             <motion.button
@@ -97,7 +98,12 @@ export default function Testimonials() {
 
       <div
         className="relative w-full overflow-hidden mask-linear-fade"
-        onPointerDown={() => setIsMarqueePaused(true)}
+        onClick={() => {
+          setIsHoverPaused(false);
+          setIsMarqueePaused((isPaused) => !isPaused);
+        }}
+        onMouseEnter={() => setIsHoverPaused(true)}
+        onMouseLeave={() => setIsHoverPaused(false)}
       >
          {/* Mask gradient for fade effect on edges */}
          <div className="absolute top-0 left-0 w-32 h-full z-20 bg-linear-to-r from-[#121212] to-transparent" />
@@ -106,7 +112,7 @@ export default function Testimonials() {
         <div className="flex w-max">
           <div
             className="testimonials-marquee flex gap-8 px-4"
-            style={{ animationPlayState: isMarqueePaused ? "paused" : undefined }}
+            style={{ animationPlayState: isMarqueePaused || isHoverPaused ? "paused" : "running" }}
           >
             {[...TESTIMONIALS, ...TESTIMONIALS, ...TESTIMONIALS].map((item, index) => (
               <div
@@ -124,7 +130,7 @@ export default function Testimonials() {
                     </div>
                  </div>
                  <p className="text-gray-300 italic leading-relaxed">
-                    "{item.quote}"
+                    &quot;{item.quote}&quot;
                  </p>
               </div>
             ))}

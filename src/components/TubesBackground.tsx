@@ -42,6 +42,7 @@ export default function TubesBackground({
   className = "",
   enableClickInteraction = true,
 }: TubesBackgroundProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const tubesRef = useRef<TubesApp | null>(null);
   const fallbackCleanupRef = useRef<(() => void) | null>(null);
@@ -95,6 +96,46 @@ export default function TubesBackground({
     };
   }, []);
 
+  useEffect(() => {
+    const container = containerRef.current;
+    const canvas = canvasRef.current;
+    if (!container || !canvas) return;
+
+    const emitMouseMove = (clientX: number, clientY: number) => {
+      canvas.dispatchEvent(
+        new MouseEvent("mousemove", {
+          bubbles: true,
+          cancelable: true,
+          clientX,
+          clientY,
+          screenX: clientX,
+          screenY: clientY,
+        })
+      );
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") {
+        emitMouseMove(event.clientX, event.clientY);
+      }
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (touch) {
+        emitMouseMove(touch.clientX, touch.clientY);
+      }
+    };
+
+    container.addEventListener("pointermove", handlePointerMove, { passive: true });
+    container.addEventListener("touchmove", handleTouchMove, { passive: true });
+
+    return () => {
+      container.removeEventListener("pointermove", handlePointerMove);
+      container.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, []);
+
   const handleClick = () => {
     if (!enableClickInteraction || !tubesRef.current?.tubes) return;
 
@@ -104,6 +145,7 @@ export default function TubesBackground({
 
   return (
     <div
+      ref={containerRef}
       className={`relative min-h-screen min-h-[100svh] w-full overflow-hidden bg-[#05060a] ${className}`}
       onClick={handleClick}
     >
@@ -112,7 +154,7 @@ export default function TubesBackground({
         className="absolute inset-0 block h-full w-full"
         style={{ touchAction: "none" }}
       />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_42%),linear-gradient(180deg,rgba(0,0,0,0.12),rgba(0,0,0,0.78))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_42%),linear-gradient(180deg,rgba(0,0,0,0.12),rgba(0,0,0,0.78))]" />
       <div
         className={`pointer-events-none relative z-10 min-h-screen min-h-[100svh] w-full transition-opacity duration-700 ${
           isLoaded ? "opacity-100" : "opacity-0"

@@ -2,6 +2,9 @@
 
 import { motion } from "framer-motion";
 
+const RESUME_URL =
+  "https://drive.google.com/file/d/1avB5ffpVwjMC4BIlT7uo6VVUOqvmGmNK/view?usp=sharing";
+
 export default function Overlay() {
   return (
     <div className="flex min-h-screen items-center justify-center px-6 py-24 text-white md:px-12">
@@ -18,6 +21,28 @@ export default function Overlay() {
           <p className="mt-5 text-xl font-light text-white/78 drop-shadow-md md:text-2xl">
             ML Researcher in Astrophysics.
           </p>
+          <a
+            href={RESUME_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pointer-events-auto mt-8 inline-flex items-center gap-3 rounded-full border border-white/15 bg-white px-6 py-3 text-sm font-bold text-black shadow-[0_0_28px_rgba(255,255,255,0.18)] transition-all hover:-translate-y-1 hover:bg-gray-200 sm:text-base"
+          >
+            <svg
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" x2="12" y1="15" y2="3" />
+            </svg>
+            Download CV
+          </a>
         </div>
 
         <div className="grid gap-6 md:gap-8">
