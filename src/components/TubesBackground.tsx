@@ -101,11 +101,23 @@ export default function TubesBackground({
     const canvas = canvasRef.current;
     if (!container || !canvas) return;
 
-    const emitMouseMove = (clientX: number, clientY: number) => {
+    const emitCanvasMove = (clientX: number, clientY: number, pointerType = "touch") => {
+      if ("PointerEvent" in window) {
+        canvas.dispatchEvent(
+          new PointerEvent("pointermove", {
+            bubbles: false,
+            cancelable: false,
+            clientX,
+            clientY,
+            pointerType,
+          })
+        );
+      }
+
       canvas.dispatchEvent(
         new MouseEvent("mousemove", {
-          bubbles: true,
-          cancelable: true,
+          bubbles: false,
+          cancelable: false,
           clientX,
           clientY,
           screenX: clientX,
@@ -114,23 +126,29 @@ export default function TubesBackground({
       );
     };
 
+    const handleMouseMove = (event: MouseEvent) => {
+      emitCanvasMove(event.clientX, event.clientY, "mouse");
+    };
+
     const handlePointerMove = (event: PointerEvent) => {
       if (event.pointerType !== "mouse") {
-        emitMouseMove(event.clientX, event.clientY);
+        emitCanvasMove(event.clientX, event.clientY, event.pointerType);
       }
     };
 
     const handleTouchMove = (event: TouchEvent) => {
       const touch = event.touches[0];
       if (touch) {
-        emitMouseMove(touch.clientX, touch.clientY);
+        emitCanvasMove(touch.clientX, touch.clientY, "touch");
       }
     };
 
+    container.addEventListener("mousemove", handleMouseMove, { passive: true });
     container.addEventListener("pointermove", handlePointerMove, { passive: true });
     container.addEventListener("touchmove", handleTouchMove, { passive: true });
 
     return () => {
+      container.removeEventListener("mousemove", handleMouseMove);
       container.removeEventListener("pointermove", handlePointerMove);
       container.removeEventListener("touchmove", handleTouchMove);
     };
@@ -151,8 +169,8 @@ export default function TubesBackground({
     >
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 block h-full w-full"
-        style={{ touchAction: "none" }}
+        className="pointer-events-none absolute inset-0 block h-full w-full"
+        style={{ touchAction: "pan-y pinch-zoom" }}
       />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_42%),linear-gradient(180deg,rgba(0,0,0,0.12),rgba(0,0,0,0.78))]" />
       <div
@@ -213,6 +231,12 @@ function initFallbackTubes(canvas: HTMLCanvasElement) {
     targetPointer.y = -(((event.clientY - rect.top) / rect.height) * 2 - 1);
   };
 
+  const handleMouseMove = (event: MouseEvent) => {
+    const rect = canvas.getBoundingClientRect();
+    targetPointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    targetPointer.y = -(((event.clientY - rect.top) / rect.height) * 2 - 1);
+  };
+
   const handleTouchMove = (event: TouchEvent) => {
     const touch = event.touches[0];
     if (!touch) return;
@@ -240,6 +264,7 @@ function initFallbackTubes(canvas: HTMLCanvasElement) {
 
   resize();
   window.addEventListener("resize", resize);
+  canvas.addEventListener("mousemove", handleMouseMove);
   canvas.addEventListener("pointermove", handlePointerMove);
   canvas.addEventListener("touchmove", handleTouchMove, { passive: true });
   frameId = requestAnimationFrame(animate);
@@ -247,6 +272,7 @@ function initFallbackTubes(canvas: HTMLCanvasElement) {
   return () => {
     cancelAnimationFrame(frameId);
     window.removeEventListener("resize", resize);
+    canvas.removeEventListener("mousemove", handleMouseMove);
     canvas.removeEventListener("pointermove", handlePointerMove);
     canvas.removeEventListener("touchmove", handleTouchMove);
     tubes.forEach((tube) => tube.geometry.dispose());
