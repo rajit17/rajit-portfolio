@@ -11,4 +11,4 @@
 ○ Compiling / ...
  GET / 200 in 16.8s (compile: 16.3s, render: 555ms)
  GET / 200 in 1885ms (compile: 395ms, render: 1490ms)
- POST / 200 in 551ms (co
+ POST / 200 in 551ms (compile: 38ms, render: 513ms)
