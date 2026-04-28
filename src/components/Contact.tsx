@@ -5,6 +5,7 @@ import { type FormEvent, useState } from "react";
 
 export default function Contact() {
   const formName = "contact";
+  const formAction = "/__forms.html";
   const [formState, setFormState] = useState({
     name: "",
     email: "",
@@ -31,7 +32,7 @@ export default function Contact() {
 
       encodedData.set("form-name", formName);
 
-      const response = await fetch("/", {
+      const response = await fetch(formAction, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -115,9 +116,8 @@ export default function Contact() {
           >
             <form
               name={formName}
+              action={formAction}
               method="POST"
-              data-netlify="true"
-              data-netlify-honeypot="bot-field"
               onSubmit={handleSubmit}
               className="space-y-6"
             >
