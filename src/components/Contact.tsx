@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 
 export default function Contact() {
   const formName = "contact";
@@ -14,19 +14,22 @@ export default function Contact() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setIsError(false);
-    
+
     try {
       const formData = new FormData(e.currentTarget);
       const encodedData = new URLSearchParams();
+
       formData.forEach((value, key) => {
         if (typeof value === "string") {
           encodedData.append(key, value);
         }
       });
+
+      encodedData.set("form-name", formName);
 
       const response = await fetch("/", {
         method: "POST",
@@ -43,8 +46,7 @@ export default function Contact() {
       setIsSuccess(true);
       setFormState({ name: "", email: "", message: "" });
       setTimeout(() => setIsSuccess(false), 3000);
-    } catch (error) {
-      console.error("Error sending message:", error);
+    } catch {
       setIsError(true);
     } finally {
       setIsSubmitting(false);

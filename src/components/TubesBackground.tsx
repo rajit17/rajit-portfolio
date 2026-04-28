@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 interface TubesBackgroundProps {
@@ -156,6 +156,7 @@ export default function TubesBackground({
 
   const handleClick = () => {
     if (!enableClickInteraction || !tubesRef.current?.tubes) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
 
     tubesRef.current.tubes.setColors?.(randomColors(3));
     tubesRef.current.tubes.setLightsColors?.(randomColors(4));
