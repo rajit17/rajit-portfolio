@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { useState } from "react";
 
 // Project Data with Media & Layout Configuration
@@ -137,6 +138,7 @@ const projects = [
 ];
 
 const INITIAL_VISIBLE_COUNT = 5;
+const modalTransition = { duration: 0.22, ease: [0.22, 1, 0.36, 1] as const };
 
 export default function Projects() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -179,20 +181,23 @@ export default function Projects() {
                 {visibleProjects.map((project, index) => (
                     <motion.div
                         key={project.id}
-                        layoutId={project.id}
                         onClick={() => setSelectedId(project.id)}
-                        initial={{ opacity: 0, y: 20, scale: 0.5 }}
+                        initial={{ opacity: 0, y: 20, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 0.28, ease: "easeOut" }}
                         viewport={{ once: true }}
-                        className={`group relative rounded-3xl overflow-hidden cursor-pointer border border-white/10 bg-white/5 backdrop-blur-md ${project.span}`}
+                        className={`group relative rounded-3xl overflow-hidden cursor-pointer border border-white/10 bg-white/5 backdrop-blur-md transform-gpu ${project.span}`}
                         whileHover={{ scale: 1.015 }}
                     >
                         {/* Media Background - Always 'mediaUrl' for Grid */}
-                        <img 
+                        <Image
                             src={project.mediaUrl}
                             alt={project.title}
+                            fill
+                            priority={index < 2}
+                            sizes="(min-width: 768px) 33vw, 100vw"
+                            decoding="async"
                             className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-all duration-700 group-hover:scale-110"
                         />
 
@@ -280,13 +285,17 @@ export default function Projects() {
                         initial={{ opacity: 0 }} 
                         animate={{ opacity: 1 }} 
                         exit={{ opacity: 0 }}
+                        transition={{ duration: 0.16, ease: "easeOut" }}
                         onClick={() => setSelectedId(null)}
-                        className="fixed inset-0 bg-black/80 backdrop-blur-xl z-60"
+                        className="fixed inset-0 bg-black/80 backdrop-blur-md z-60"
                     />
                     <div className="fixed inset-0 flex items-center justify-center z-70 pointer-events-auto p-4 md:p-8">
                         <motion.div
-                           layoutId={selectedId}
-                           className="bg-[#121212] w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-4xl border border-white/10 shadow-2xl relative scrollbar-hide"
+                           initial={{ opacity: 0, scale: 0.96, y: 16 }}
+                           animate={{ opacity: 1, scale: 1, y: 0 }}
+                           exit={{ opacity: 0, scale: 0.97, y: 10 }}
+                           transition={modalTransition}
+                           className="bg-[#121212] w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-4xl border border-white/10 shadow-2xl relative scrollbar-hide transform-gpu will-change-transform"
                         >
                            <button 
                                 onClick={() => setSelectedId(null)}
@@ -300,9 +309,12 @@ export default function Projects() {
                            <div className="flex flex-col md:flex-row h-full">
                                 { /* Visual Side - Prioritize 'demoUrl', fallback to 'mediaUrl' */ }
                                 <div className={`w-full md:w-2/5 min-h-[300px] relative overflow-hidden flex flex-col justify-end p-8`}>
-                                    <img 
+                                    <Image
                                         src={selectedProject.demoUrl || selectedProject.mediaUrl}
                                         alt={selectedProject.title}
+                                        fill
+                                        sizes="(min-width: 768px) 40vw, 100vw"
+                                        decoding="async"
                                         className="absolute inset-0 w-full h-full object-cover opacity-80" 
                                     />
                                    <div className={`absolute inset-0 bg-linear-to-b ${selectedProject.color} mix-blend-overlay opacity-80`} />
@@ -311,7 +323,7 @@ export default function Projects() {
                                    <motion.span 
                                      initial={{ opacity: 0, y: 10 }}
                                      animate={{ opacity: 1, y: 0 }}
-                                     transition={{ delay: 0.2 }}
+                                     transition={{ delay: 0.06, ...modalTransition }}
                                      className="relative z-10 inline-block px-3 py-1 rounded-full bg-black/40 text-xs font-mono text-white mb-4 w-fit border border-white/10 backdrop-blur-md"
                                    >
                                      {selectedProject.category}
@@ -319,7 +331,7 @@ export default function Projects() {
                                    <motion.h3 
                                      initial={{ opacity: 0, y: 10 }}
                                      animate={{ opacity: 1, y: 0 }}
-                                     transition={{ delay: 0.3 }}
+                                     transition={{ delay: 0.08, ...modalTransition }}
                                      className="relative z-10 text-4xl font-bold text-white leading-none tracking-tight drop-shadow-xl"
                                    >
                                      {selectedProject.title}
@@ -329,9 +341,9 @@ export default function Projects() {
                                 {/* Content Side */}
                                 <div className="w-full md:w-3/5 p-8 md:p-12 bg-[#121212]">
                                     <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        transition={{ delay: 0.4 }}
+                                        initial={{ opacity: 0, y: 8 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.08, ...modalTransition }}
                                     >
                                         <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">About the project</h4>
                                         <p className="text-gray-300 leading-relaxed mb-8 text-lg">
@@ -346,7 +358,7 @@ export default function Projects() {
                                                         key={tech} 
                                                         initial={{ opacity: 0, scale: 0.9 }}
                                                         animate={{ opacity: 1, scale: 1 }}
-                                                        transition={{ delay: 0.5 + (i * 0.05) }}
+                                                        transition={{ delay: 0.12 + (i * 0.03), ...modalTransition }}
                                                         className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-sm text-gray-200 border border-white/5 transition-colors cursor-default"
                                                     >
                                                         {tech}

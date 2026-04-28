@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRef } from "react";
 
 const TIMELINE_DATA = [
@@ -41,6 +41,8 @@ const TIMELINE_DATA = [
   },
 ];
 
+type TimelineEntry = (typeof TIMELINE_DATA)[number];
+
 export default function Timeline() {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +66,7 @@ export default function Timeline() {
              My <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-purple-400">Journey</span>
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
-            From writing my first "Hello World" to building complex ML models. 
+            From writing my first &quot;Hello World&quot; to building complex ML models. 
             Here is a glimpse into my professional evolution.
           </p>
         </motion.div>
@@ -84,7 +86,7 @@ export default function Timeline() {
   );
 }
 
-function TimelineItem({ item, index }: { item: any; index: number }) {
+function TimelineItem({ item, index }: { item: TimelineEntry; index: number }) {
   const isEven = index % 2 === 0;
 
   return (

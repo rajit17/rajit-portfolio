@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 
 export default function Contact() {
+  const formName = "contact";
   const [formState, setFormState] = useState({
     name: "",
     email: "",
@@ -11,30 +12,40 @@ export default function Contact() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setIsError(false);
     
     try {
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
+      const formData = new FormData(e.currentTarget);
+      const encodedData = new URLSearchParams();
+      formData.forEach((value, key) => {
+        if (typeof value === "string") {
+          encodedData.append(key, value);
+        }
+      });
+
+      const response = await fetch("/", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: JSON.stringify(formState),
+        body: encodedData.toString(),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        throw new Error("Failed to send message");
       }
 
       setIsSuccess(true);
       setFormState({ name: "", email: "", message: "" });
       setTimeout(() => setIsSuccess(false), 3000);
     } catch (error) {
-      console.error('Error sending message:', error);
-      alert('Failed to send message. Please try again later.');
+      console.error("Error sending message:", error);
+      setIsError(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -100,12 +111,26 @@ export default function Contact() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-10 backdrop-blur-sm"
           >
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form
+              name={formName}
+              method="POST"
+              data-netlify="true"
+              data-netlify-honeypot="bot-field"
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
+              <input type="hidden" name="form-name" value={formName} />
+              <p className="hidden">
+                <label>
+                  Don&apos;t fill this out: <input name="bot-field" tabIndex={-1} />
+                </label>
+              </p>
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-400 mb-2">Name</label>
                 <input
                   type="text"
                   id="name"
+                  name="name"
                   value={formState.name}
                   onChange={(e) => setFormState({ ...formState, name: e.target.value })}
                   className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-hidden focus:border-blue-500 transition-colors"
@@ -118,6 +143,7 @@ export default function Contact() {
                 <input
                   type="email"
                   id="email"
+                  name="email"
                   value={formState.email}
                   onChange={(e) => setFormState({ ...formState, email: e.target.value })}
                   className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-hidden focus:border-blue-500 transition-colors"
@@ -129,6 +155,7 @@ export default function Contact() {
                 <label htmlFor="message" className="block text-sm font-medium text-gray-400 mb-2">Message</label>
                 <textarea
                   id="message"
+                  name="message"
                   value={formState.message}
                   onChange={(e) => setFormState({ ...formState, message: e.target.value })}
                   rows={4}
@@ -154,6 +181,11 @@ export default function Contact() {
                   "Send Message"
                 )}
               </button>
+              {isError && (
+                <p className="text-sm text-red-300">
+                  Message could not be sent. Please try again or email me directly.
+                </p>
+              )}
             </form>
           </motion.div>
         </div>

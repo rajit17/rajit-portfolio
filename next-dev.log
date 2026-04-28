@@ -1,0 +1,14 @@
+
+> personal_porfolio@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 3000 --webpack
+
+▲ Next.js 16.1.3 (webpack)
+- Local:         http://127.0.0.1:3000
+- Network:       http://127.0.0.1:3000
+
+✓ Starting...
+✓ Ready in 6.8s
+○ Compiling / ...
+ GET / 200 in 16.8s (compile: 16.3s, render: 555ms)
+ GET / 200 in 1885ms (compile: 395ms, render: 1490ms)
+ POST / 200 in 551ms (co
